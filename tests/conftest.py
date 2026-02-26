@@ -5,6 +5,64 @@ from unittest.mock import MagicMock, Mock
 
 import pytest
 
+# Mock MetaTrader5 module immediately to avoid ImportError during collection
+if "MetaTrader5" not in sys.modules:
+    mock_mt5_module = MagicMock()
+    sys.modules["MetaTrader5"] = mock_mt5_module
+
+    # Set constants on the initial mock so they are available at import time
+    mock_mt5_module.TIMEFRAME_M1 = 1
+    mock_mt5_module.TIMEFRAME_M2 = 2
+    mock_mt5_module.TIMEFRAME_M3 = 3
+    mock_mt5_module.TIMEFRAME_M4 = 4
+    mock_mt5_module.TIMEFRAME_M5 = 5
+    mock_mt5_module.TIMEFRAME_M6 = 6
+    mock_mt5_module.TIMEFRAME_M10 = 10
+    mock_mt5_module.TIMEFRAME_M12 = 12
+    mock_mt5_module.TIMEFRAME_M15 = 15
+    mock_mt5_module.TIMEFRAME_M20 = 20
+    mock_mt5_module.TIMEFRAME_M30 = 30
+    mock_mt5_module.TIMEFRAME_H1 = 16385
+    mock_mt5_module.TIMEFRAME_H2 = 16386
+    mock_mt5_module.TIMEFRAME_H3 = 16387
+    mock_mt5_module.TIMEFRAME_H4 = 16388
+    mock_mt5_module.TIMEFRAME_H6 = 16390
+    mock_mt5_module.TIMEFRAME_H8 = 16392
+    mock_mt5_module.TIMEFRAME_H12 = 16396
+    mock_mt5_module.TIMEFRAME_D1 = 16408
+    mock_mt5_module.TIMEFRAME_W1 = 32769
+    mock_mt5_module.TIMEFRAME_MN1 = 49153
+
+    mock_mt5_module.TRADE_ACTION_DEAL = 1
+    mock_mt5_module.TRADE_ACTION_PENDING = 2
+    mock_mt5_module.TRADE_ACTION_SLTP = 5
+    mock_mt5_module.TRADE_ACTION_MODIFY = 6
+    mock_mt5_module.TRADE_ACTION_REMOVE = 8
+    mock_mt5_module.TRADE_ACTION_CLOSE_BY = 10
+
+    mock_mt5_module.ORDER_TYPE_BUY = 0
+    mock_mt5_module.ORDER_TYPE_SELL = 1
+    mock_mt5_module.ORDER_TYPE_BUY_LIMIT = 2
+    mock_mt5_module.ORDER_TYPE_SELL_LIMIT = 3
+    mock_mt5_module.ORDER_TYPE_BUY_STOP = 4
+    mock_mt5_module.ORDER_TYPE_SELL_STOP = 5
+    mock_mt5_module.ORDER_TYPE_BUY_STOP_LIMIT = 6
+    mock_mt5_module.ORDER_TYPE_SELL_STOP_LIMIT = 7
+    mock_mt5_module.ORDER_TYPE_CLOSE_BY = 8
+
+    mock_mt5_module.ORDER_FILLING_FOK = 0
+    mock_mt5_module.ORDER_FILLING_IOC = 1
+    mock_mt5_module.ORDER_FILLING_RETURN = 2
+
+    mock_mt5_module.ORDER_TIME_GTC = 0
+    mock_mt5_module.ORDER_TIME_DAY = 1
+    mock_mt5_module.ORDER_TIME_SPECIFIED = 2
+    mock_mt5_module.ORDER_TIME_SPECIFIED_DAY = 3
+
+    mock_mt5_module.COPY_TICKS_ALL = -1
+    mock_mt5_module.COPY_TICKS_INFO = 1
+    mock_mt5_module.COPY_TICKS_TRADE = 2
+
 
 @pytest.fixture
 def mock_mt5(monkeypatch):

@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import Any
 
 import MetaTrader5 as mt5
+import numpy as np
 import pandas as pd
 from fastmcp import FastMCP
 from pydantic import BaseModel, field_validator
@@ -280,17 +281,23 @@ class Deal(BaseModel):
     external_id: str
 
 
-def _format_timestamps_to_iso8601_utc(df: pd.DataFrame) -> None:
+def _process_mt5_data(data: np.ndarray | tuple | list) -> list[dict[str, Any]]:
     """
-    Convert timestamp columns in a DataFrame to ISO 8601 UTC format strings.
-
-    Modifies the DataFrame in-place, converting:
-    - 'time' column: seconds -> ISO 8601 with Z suffix (e.g., "2024-01-22T10:00:00Z")
-    - 'time_msc' column: milliseconds -> ISO 8601 with milliseconds and Z suffix (e.g., "2024-01-22T10:00:00.123Z")
+    Process raw MT5 data (numpy array or tuple) into a list of dictionaries with formatted timestamps.
 
     Args:
-        df: DataFrame containing timestamp columns to format
+        data: Raw data returned by MT5 functions.
+
+    Returns:
+        List[Dict[str, Any]]: Processed data with formatted timestamps.
     """
+    if data is None:
+        return []
+
+    # Convert to DataFrame
+    df = pd.DataFrame(data)
+
+    # Format timestamps
     if "time" in df.columns:
         df["time"] = pd.to_datetime(df["time"], unit="s", utc=True).dt.strftime(
             "%Y-%m-%dT%H:%M:%SZ"
@@ -306,6 +313,8 @@ def _format_timestamps_to_iso8601_utc(df: pd.DataFrame) -> None:
             + (df["time_msc"] % 1000).astype(str).str.zfill(3)
             + "Z"
         )
+
+    return df.to_dict("records")
 
 
 timeframe_map = {
@@ -668,12 +677,7 @@ def copy_rates_from_pos(
         logger.error(f"Failed to copy rates for {symbol}, error code: {mt5.last_error()}")
         raise ValueError(f"Failed to copy rates for {symbol}")
 
-    # Convert numpy array to list of dictionaries
-    df = pd.DataFrame(rates)
-    # Convert timestamps to ISO 8601 UTC format for JSON serialization
-    _format_timestamps_to_iso8601_utc(df)
-
-    return df.to_dict("records")
+    return _process_mt5_data(rates)
 
 
 # Copy rates from date
@@ -700,12 +704,7 @@ def copy_rates_from_date(
         )
         raise ValueError(f"Failed to copy rates for {symbol} from date {date_from}")
 
-    # Convert numpy array to list of dictionaries
-    df = pd.DataFrame(rates)
-    # Convert timestamps to ISO 8601 UTC format for JSON serialization
-    _format_timestamps_to_iso8601_utc(df)
-
-    return df.to_dict("records")
+    return _process_mt5_data(rates)
 
 
 # Copy rates range
@@ -732,12 +731,7 @@ def copy_rates_range(
         )
         raise ValueError(f"Failed to copy rates for {symbol} in range {date_from} to {date_to}")
 
-    # Convert numpy array to list of dictionaries
-    df = pd.DataFrame(rates)
-    # Convert timestamps to ISO 8601 UTC format for JSON serialization
-    _format_timestamps_to_iso8601_utc(df)
-
-    return df.to_dict("records")
+    return _process_mt5_data(rates)
 
 
 # Copy ticks from position
@@ -765,12 +759,7 @@ def copy_ticks_from_pos(
         logger.error(f"Failed to copy ticks for {symbol}, error code: {mt5.last_error()}")
         raise ValueError(f"Failed to copy ticks for {symbol}")
 
-    # Convert numpy array to list of dictionaries
-    df = pd.DataFrame(ticks)
-    # Convert timestamps to ISO 8601 UTC format for JSON serialization
-    _format_timestamps_to_iso8601_utc(df)
-
-    return df.to_dict("records")
+    return _process_mt5_data(ticks)
 
 
 # Copy ticks from date
@@ -797,12 +786,7 @@ def copy_ticks_from_date(
         )
         raise ValueError(f"Failed to copy ticks for {symbol} from date {date_from}")
 
-    # Convert numpy array to list of dictionaries
-    df = pd.DataFrame(ticks)
-    # Convert timestamps to ISO 8601 UTC format for JSON serialization
-    _format_timestamps_to_iso8601_utc(df)
-
-    return df.to_dict("records")
+    return _process_mt5_data(ticks)
 
 
 # Copy ticks range
@@ -829,12 +813,7 @@ def copy_ticks_range(
         )
         raise ValueError(f"Failed to copy ticks for {symbol} in range {date_from} to {date_to}")
 
-    # Convert numpy array to list of dictionaries
-    df = pd.DataFrame(ticks)
-    # Convert timestamps to ISO 8601 UTC format for JSON serialization
-    _format_timestamps_to_iso8601_utc(df)
-
-    return df.to_dict("records")
+    return _process_mt5_data(ticks)
 
 
 # Get last error
@@ -1180,8 +1159,9 @@ def positions_get(symbol: str | None = None, group: str | None = None) -> list[P
         positions = mt5.positions_get()
 
     if positions is None:
-        logger.error(f"Failed to get positions, error code: {mt5.last_error()}")
-        return []
+        error_code, error_msg = mt5.last_error()
+        logger.error(f"Failed to get positions, error: {error_code} - {error_msg}")
+        raise ValueError(f"Failed to get positions. Error: {error_code} - {error_msg}")
 
     result = []
     for position in positions:
@@ -1235,8 +1215,9 @@ def orders_get(symbol: str | None = None, group: str | None = None) -> list[dict
         orders = mt5.orders_get()
 
     if orders is None:
-        logger.error(f"Failed to get orders, error code: {mt5.last_error()}")
-        return []
+        error_code, error_msg = mt5.last_error()
+        logger.error(f"Failed to get orders, error: {error_code} - {error_msg}")
+        raise ValueError(f"Failed to get orders. Error: {error_code} - {error_msg}")
 
     result = []
     for order in orders:
@@ -1313,8 +1294,9 @@ def history_orders_get(
         orders = mt5.history_orders_get()
 
     if orders is None:
-        logger.error(f"Failed to get history orders, error code: {mt5.last_error()}")
-        return []
+        error_code, error_msg = mt5.last_error()
+        logger.error(f"Failed to get history orders, error: {error_code} - {error_msg}")
+        raise ValueError(f"Failed to get history orders. Error: {error_code} - {error_msg}")
 
     result = []
     for order in orders:
@@ -1370,8 +1352,9 @@ def history_deals_get(
         deals = mt5.history_deals_get()
 
     if deals is None:
-        logger.error(f"Failed to get history deals, error code: {mt5.last_error()}")
-        return []
+        error_code, error_msg = mt5.last_error()
+        logger.error(f"Failed to get history deals, error: {error_code} - {error_msg}")
+        raise ValueError(f"Failed to get history deals. Error: {error_code} - {error_msg}")
 
     result = []
     for deal in deals:
