@@ -185,3 +185,56 @@ class TestTerminalInfo:
 
         mock_mt5.terminal_info.assert_called_once()
         mock_mt5.last_error.assert_called_once()
+
+
+@pytest.mark.unit
+class TestTradingFunctions:
+    """Test trading information retrieval functions."""
+
+    @patch("mcp_mt5.main.mt5")
+    async def test_positions_get_failure(self, mock_mt5):
+        """Test failure in getting positions."""
+        mock_mt5.positions_get.return_value = None
+        mock_mt5.last_error.return_value = (1, "Generic error")
+
+        async with Client(mcp) as client:
+            with pytest.raises(Exception, match="Failed to get positions"):
+                await client.call_tool("positions_get", {})
+
+        mock_mt5.positions_get.assert_called_once()
+
+    @patch("mcp_mt5.main.mt5")
+    async def test_orders_get_failure(self, mock_mt5):
+        """Test failure in getting orders."""
+        mock_mt5.orders_get.return_value = None
+        mock_mt5.last_error.return_value = (1, "Generic error")
+
+        async with Client(mcp) as client:
+            with pytest.raises(Exception, match="Failed to get orders"):
+                await client.call_tool("orders_get", {})
+
+        mock_mt5.orders_get.assert_called_once()
+
+    @patch("mcp_mt5.main.mt5")
+    async def test_history_orders_get_failure(self, mock_mt5):
+        """Test failure in getting history orders."""
+        mock_mt5.history_orders_get.return_value = None
+        mock_mt5.last_error.return_value = (1, "Generic error")
+
+        async with Client(mcp) as client:
+            with pytest.raises(Exception, match="Failed to get history orders"):
+                await client.call_tool("history_orders_get", {})
+
+        mock_mt5.history_orders_get.assert_called_once()
+
+    @patch("mcp_mt5.main.mt5")
+    async def test_history_deals_get_failure(self, mock_mt5):
+        """Test failure in getting history deals."""
+        mock_mt5.history_deals_get.return_value = None
+        mock_mt5.last_error.return_value = (1, "Generic error")
+
+        async with Client(mcp) as client:
+            with pytest.raises(Exception, match="Failed to get history deals"):
+                await client.call_tool("history_deals_get", {})
+
+        mock_mt5.history_deals_get.assert_called_once()

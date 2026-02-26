@@ -75,7 +75,7 @@ class TestCopyRatesFromPosJsonSerialization:
         """Test that the returned data can be serialized to JSON"""
         mock_copy_rates.return_value = mock_rates_data
 
-        result = copy_rates_from_pos(symbol="EURUSD", timeframe=60, start_pos=0, count=3)
+        result = copy_rates_from_pos.fn(symbol="EURUSD", timeframe=60, start_pos=0, count=3)
 
         # This should not raise an exception if data is JSON-serializable
         try:
@@ -89,7 +89,7 @@ class TestCopyRatesFromPosJsonSerialization:
         """Test that datetime fields are returned as ISO format strings"""
         mock_copy_rates.return_value = mock_rates_data
 
-        result = copy_rates_from_pos(symbol="EURUSD", timeframe=60, start_pos=0, count=3)
+        result = copy_rates_from_pos.fn(symbol="EURUSD", timeframe=60, start_pos=0, count=3)
 
         assert len(result) > 0
         # Check that time field is a string (ISO format)
@@ -102,7 +102,7 @@ class TestCopyRatesFromPosJsonSerialization:
         """Test that numeric fields maintain their values"""
         mock_copy_rates.return_value = mock_rates_data
 
-        result = copy_rates_from_pos(symbol="EURUSD", timeframe=60, start_pos=0, count=3)
+        result = copy_rates_from_pos.fn(symbol="EURUSD", timeframe=60, start_pos=0, count=3)
 
         assert len(result) == 3
         # Check first bar
@@ -121,7 +121,7 @@ class TestCopyRatesFromDateJsonSerialization:
         """Test that the returned data can be serialized to JSON"""
         mock_copy_rates.return_value = mock_rates_data
 
-        result = copy_rates_from_date(
+        result = copy_rates_from_date.fn(
             symbol="EURUSD", timeframe=60, date_from=datetime(2024, 1, 1), count=3
         )
 
@@ -141,7 +141,7 @@ class TestCopyRatesRangeJsonSerialization:
         """Test that the returned data can be serialized to JSON"""
         mock_copy_rates.return_value = mock_rates_data
 
-        result = copy_rates_range(
+        result = copy_rates_range.fn(
             symbol="EURUSD",
             timeframe=60,
             date_from=datetime(2024, 1, 1),
@@ -164,7 +164,7 @@ class TestCopyTicksJsonSerialization:
         """Test that copy_ticks_from_pos returns JSON-serializable data"""
         mock_copy_ticks.return_value = mock_ticks_data
 
-        result = copy_ticks_from_pos(symbol="EURUSD", start_time=datetime(2024, 1, 1), count=2)
+        result = copy_ticks_from_pos.fn(symbol="EURUSD", start_time=datetime(2024, 1, 1), count=2)
 
         # This should not raise an exception
         try:
@@ -182,7 +182,7 @@ class TestCopyTicksJsonSerialization:
         """Test that copy_ticks_from_date returns JSON-serializable data"""
         mock_copy_ticks.return_value = mock_ticks_data
 
-        result = copy_ticks_from_date(symbol="EURUSD", date_from=datetime(2024, 1, 1), count=2)
+        result = copy_ticks_from_date.fn(symbol="EURUSD", date_from=datetime(2024, 1, 1), count=2)
 
         # This should not raise an exception
         try:
@@ -196,7 +196,7 @@ class TestCopyTicksJsonSerialization:
         """Test that copy_ticks_range returns JSON-serializable data"""
         mock_copy_ticks.return_value = mock_ticks_data
 
-        result = copy_ticks_range(
+        result = copy_ticks_range.fn(
             symbol="EURUSD", date_from=datetime(2024, 1, 1), date_to=datetime(2024, 1, 2)
         )
 
