@@ -24,7 +24,7 @@ def main():
         mcp.run(transport="http", host=host, port=port)
     else:
         # Default to stdio for MCP clients like Claude Desktop
-        mcp.run(transport="stdio")
+        mcp.run(transport="stdio", show_banner=False, log_level="CRITICAL")
 
 
 if __name__ == "__main__":
